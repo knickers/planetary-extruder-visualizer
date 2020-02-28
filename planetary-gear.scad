@@ -1,24 +1,25 @@
-// Planetary gear bearing (customizable)
+// Planetary gear kinetic extruder visualizer (customizable)
+// Built on planetary gear bearing, https://www.thingiverse.com/thing:53451
 
-// Mounting Tab Radius
-mountR=6.15;
-mountR=mountR/2;
-// Mounting Tab Distance
-mountD=31;
+// Mounting Tab Diameter
+mountD=6.15;
+// Mounting Tab Width Distance
+mountW=31;
 
 // outer diameter of ring
-D=51.7;
+//D=51.7;
+D=sqrt(2)*mountW;
 // thickness
-T=5;
+T=4;
 // clearance
-tol=0.15;
+tol=0.2;
 number_of_planets=3;
-number_of_teeth_on_planets=7;
+number_of_teeth_on_planets=6;
 approximate_number_of_teeth_on_sun=9;
 // pressure angle
 P=45;//[30:60]
 // number of teeth to twist across
-nTwist=0.5;
+nTwist=0.3;
 // width of hexagonal hole
 w=6.7;
 
@@ -41,32 +42,44 @@ echo(helix_angle);
 phi=$t*360/m;
 
 translate([0,0,T/2]){
+	// Ring Gear
 	difference(){
 		cylinder(r=D/2,h=T,center=true,$fn=100);
 		herringbone(nr,pitch,P,DR,-tol,helix_angle,T+0.2);
 	}
+	// Sun Gear
 	rotate([0,0,(np+1)*180/ns+phi*(ns+np)*2/ns])
 	difference(){
 		mirror([0,1,0])
 			herringbone(ns,pitch,P,DR,tol,helix_angle,T);
 		cylinder(r=w/sqrt(3),h=T+1,center=true,$fn=6);
 	}
+	// Planet Gears
 	for(i=[1:m])
 		rotate([0,0,i*360/m+phi])
 			translate([pitchD/2*(ns+np)/nr,0,0])
 				rotate([0,0,i*ns/m*360/np-phi*(ns+np)/np-phi])
 					herringbone(np,pitch,P,DR,tol,helix_angle,T);
-	for(i=[0:3])
-		rotate([0,0,i*90])
-			translate([D/2+0,0,T/2+1])
-				mount();
+	// Mounting Tabs
+	difference(){
+		for(i=[0:3])
+			rotate([0,0,i*90+45])
+				translate([D/2+0,0,T/2])
+					mount();
+		cylinder(r=D/2-tol,h=T,center=true,$fn=100);
+	}
 }
+translate([mountW,0,0/*w/2-tol*/])
+//	rotate([90,0,0])
+		cylinder(r=w/sqrt(3)-tol,h=T+2,$fn=6);
 
 module mount(){
 	difference(){
-		cylinder(r=mountR,h=2,center=true,$fn=32);
-		cylinder(r=mountR-0.6,h=2,center=true,$fn=32);
+		cylinder(d=mountD,h=2,$fn=32);
+		cylinder(d1=mountD-2,d2=mountD-1,h=2,$fn=32);
 	}
+	translate([0,0,-T])
+		cylinder(d1=0,d2=mountD,h=T,$fn=32);
 }
 
 module rack(

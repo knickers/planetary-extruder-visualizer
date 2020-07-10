@@ -12,7 +12,7 @@ D=sqrt(2)*mountW;
 // thickness
 T=4;
 // clearance
-tol=0.2;
+tol=0.3;
 number_of_planets=3;
 number_of_teeth_on_planets=6;
 approximate_number_of_teeth_on_sun=9;
